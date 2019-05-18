@@ -1,7 +1,5 @@
 test
 test-sam
-<<<<<<< HEAD
-
 another test
 =======
 hellooo
