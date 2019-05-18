@@ -1,2 +1,10 @@
 test
 test-sam
+<<<<<<< HEAD
+
+another test
+=======
+hellooo
+
+noooo it wont
+>>>>>>> 66d9181ad8e69adad91028ff49cafca2f3e08872
