@@ -1,10 +1,8 @@
 # Data competition
 
-# setwd("/Users/gregfaletto/Google Drive/Data Science/R/OCRUG Hackathon/Data")
-
 # setwd("/Users/gregfaletto/Google Drive/Data Science/R/OCRUG Hackathon")
 
-# setwd("/Users/gregfaletto/Documents/GitHub/OC-Data-Science-Hackathon-19")
+# setwd("/Users/gregfaletto/Google Drive/Data Science/R/OCRUG Hackathon/Data")
 
 
 
@@ -55,11 +53,11 @@ print("Storing parameters...")
 # # directory where output should be stored
 # dir.out <- "/Users/gregoryfaletto/Documents/R/Citadel/Models"
 
-# # directory where this R file lives
-# dir.main <- "/Users/gregfaletto/Google Drive/Data Science/R/OCRUG Hackathon"
+# directory where this R file lives
+dir.main <- "/Users/gregfaletto/Google Drive/Data Science/R/OCRUG Hackathon"
 
-# # directory where R raw, processed data files live
-# dir.dat <- "/Users/gregfaletto/Google Drive/Data Science/R/OCRUG Hackathon/Data"
+# directory where R raw, processed data files live
+dir.dat <- "/Users/gregfaletto/Google Drive/Data Science/R/OCRUG Hackathon/Data"
 
 # # directory where geographic data files live
 # dir.geo <- "/Users/gregfaletto/Documents/R/ZipRecruiter/Geographic data"
@@ -88,15 +86,11 @@ if(load.dat){
 	t0 <- Sys.time()
 
 	## Read in training and data data, the latter may take a few minutes to run
-	# setwd(dir.dat)
-	dir.main <- getwd()
+	setwd(dir.dat)
 
 	# Chemicals data
-	setwd("External Data/Chemicals/")
 	raw.cal.chemicals.dat <- read.csv(file=dat.chems)
 	# 2010 health outcomes
-	setwd(dir.main)
-	setwd("External Data/Health Outcomes/")
 	health.2010 <- read.csv(file="2016_health_outcomes_clean.csv", header=TRUE)
 	# 2011 health outcomes
 	health.2011 <- read.csv(file="2016_health_outcomes_clean.csv", header=TRUE)
