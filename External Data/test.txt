@@ -1,8 +1,6 @@
 test
 test-sam
-<<<<<<< HEAD
-
-This is javier's test on the same file. Will this work?!?
+another test
 =======
 hellooo
 
