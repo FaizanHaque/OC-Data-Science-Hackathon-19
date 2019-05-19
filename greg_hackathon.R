@@ -45,6 +45,8 @@ library(plyr)
 library(dplyr)
 library(ggplot2)
 library(glmnet)
+library(gglasso)
+library(stabs)
 # library(googleway)
 # library(lsr)
 
@@ -130,6 +132,11 @@ if(load.dat){
 	setwd("External Data/Earnings/")
 	earnings <- read.csv(file="earnings.csv", header=TRUE)
 
+	# Demographics data
+	setwd(dir.main)
+	setwd("External Data/Demographics/")
+	demographics <- read.csv(file="cc-est2017-alldata-06.csv", header=TRUE)
+
 	# # Propensity score matching data
 	# raw.covariate.dat <- read.csv(file=dat.prop, head=TRUE, sep=",")
 	# # Water usage (desired response)
@@ -201,9 +208,9 @@ rurality.plot <- ggplot(df.rurality, aes(x=rurality.fips)) +
 	geom_histogram(binwidth=1)
 print(rurality.plot)
 
-# # Use coarser classification for rurality
-# rurality.fips[rurality.fips %in% c(3, 4, 5)] <- 3
-# rurality.fips[rurality.fips %in% c(6, 7, 8, 9)] <- 4
+# Use coarser classification for rurality
+rurality.fips[rurality.fips %in% c(3, 4, 5)] <- 3
+rurality.fips[rurality.fips %in% c(6, 7, 8, 9)] <- 4
 
 rurality.fips <- factor(rurality.fips, ordered=TRUE)
 
@@ -234,6 +241,60 @@ for(j in 1:length(fips)){
 X.dat <- data.frame(X.dat, earnings.fips)
 colnames(X.dat)[ncol(X.dat)] <- "earnings"
 
+# Demographic data: remove all but last year, California data
+demographics <- demographics[demographics$STNAME=="California" &
+	demographics$YEAR==10, ]
+# Add FIPS numbers to demographic data
+raw.cal.chemicals.dat$county  <- tolower(gsub(" County", "",
+	raw.cal.chemicals.dat$county))
+demographics$CTYNAME <- tolower(gsub(" County", "", demographics$CTYNAME))
+
+counties <- unique(demographics$CTYNAME)
+
+fips <- numeric(nrow(demographics))
+demographics <- data.frame(demographics, fips)
+for(i in 1:length(counties)){
+	if(any(raw.cal.chemicals.dat$county==counties[i])){
+		demographics[demographics$CTYNAME==counties[i], "fips"] <-
+			raw.cal.chemicals.dat[raw.cal.chemicals.dat$county==counties[i],
+			"fips"][1]
+	} else{
+		print(paste("ERROR: no match for county", counties[i]))
+	}
+	
+}
+
+fips <- X.dat$FIPS
+
+# Add over.65 (percentage of population over 65) data to X
+over.65.fips <- integer(length(fips))
+for(j in 1:length(fips)){
+	# Find proportion of population over 65
+	tot.over.65 <- sum(demographics[demographics$fips==fips[j] &
+		demographics$AGEGRP>13, "TOT_POP"])
+	tot.pop <- sum(demographics[demographics$fips==fips[j], "TOT_POP"])
+	over.65.fips[j] <- tot.over.65/tot.pop
+}
+
+X.dat <- data.frame(X.dat, over.65.fips)
+colnames(X.dat)[ncol(X.dat)] <- "pct.over.65"
+
+
+# Add race data to X
+white.fips <- integer(length(fips))
+for(j in 1:length(fips)){
+	# Find proportion of population over 65
+	tot.white <- sum(demographics[demographics$fips==fips[j], c("WA_MALE",
+		"WA_FEMALE")])
+	tot.pop <- sum(demographics[demographics$fips==fips[j], "TOT_POP"])
+	white.fips[j] <- tot.white/tot.pop
+}
+
+X.dat <- data.frame(X.dat, white.fips)
+colnames(X.dat)[ncol(X.dat)] <- "pct.white"
+
+
+
 # Response vector
 
 Y <- numeric(length(fips))
@@ -246,7 +307,6 @@ for(j in 1:length(fips)){
 # write.csv(X.dat, file="X.csv")
 # write.csv(Y, file="Y.csv")
 
-
 # plot data
 data.ggplot <- data.frame(X.dat[, -1], Y)
 
@@ -258,17 +318,18 @@ data.ggplot <- data.frame(X.dat[, -1], Y)
 # # Fit lasso model
 # model <- cv.glmnet(x=as.matrix(X.dat[, 2:ncol(X.dat)]), y=Y)
 
-linear.model <- lm(Y~Arsenic+Nitrates+Uranium+rurality+pct.agricultural+earnings,
-	data.ggplot)
+linear.model <- lm(Y~Arsenic+Nitrates+Uranium+rurality+pct.agricultural+
+	earnings+pct.over.65 + pct.white, data.ggplot)
 linear.model.ints <- lm(Y~Arsenic+Nitrates+Uranium +rurality + pct.agricultural
-	+ earnings + Arsenic:Nitrates + Arsenic:Uranium + Nitrates:Uranium 
-	+ rurality:Arsenic + rurality:Nitrates + rurality:Uranium, data.ggplot)
+	+ earnings +pct.over.65 + Arsenic:Nitrates + Arsenic:Uranium 
+	+ Nitrates:Uranium + rurality:Arsenic + rurality:Nitrates 
+	+ rurality:Uranium, data.ggplot)
 
-linear.model.ints.2 <- lm(Y~Uranium +rurality + Nitrates:Uranium + earnings,
-	data.ggplot)
+linear.model.ints.2 <- lm(Y~Nitrates +rurality + earnings + pct.over.65
+	+ Uranium + Arsenic:Uranium + Nitrates:Uranium + Arsenic:rurality
+	+ Uranium:rurality, data.ggplot)
 
-linear.model.ints.3 <- lm(Y~Nitrates + pct.agricultural
-	+ pct.agricultural:Nitrates + earnings, data.ggplot)
+linear.model.ints.3 <- lm(Y~Nitrates + earnings + pct.over.65, data.ggplot)
 
 # X.pred <- model.matrix(X.dat[, -1])[, -1]
 
@@ -284,4 +345,16 @@ formula.int <- as.formula(Y ~ .*.)
 X.pred.int <- model.matrix(formula.int, data.ggplot)[, -1]
 lasso.fit.ints <- cv.glmnet(X.pred.int, Y)
 
+# # Stability selection
+# stabs.selec <- stabsel(X.pred, Y, cutoff=0.55, q=5)
 
+# Group lasso
+groups <- c(1, 2, 3, 4, 5, 5, 5, 6, 7, 8, 9)
+g.lasso.fit <- cv.gglasso(x=X.pred, y=Y, group=groups, nfolds=10)
+
+# Group lasso with interactions
+groups.ints <- c(1, 2, 3, 4, 5, 5, 5, 6, 7, 8, 9, 10, 11, 12, 13, 13, 13, 14,
+	15, 16, 17, 18, 19, 20, 20, 20, 21, 22, 23, 24, 25, 26, 26, 26, 27, 28, 29,
+	30, 31, 31, 31, 32, 33, 34, 35, 36, 36, 36, 37, 37, 37, 38, 38, 38, 39, 39,
+	39, 40, 41, 42, 43, 44, 45)
+g.lasso.fit.int <- cv.gglasso(x=X.pred.int, y=Y, group=groups.ints, nfolds=10)
