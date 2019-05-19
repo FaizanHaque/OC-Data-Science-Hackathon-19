@@ -370,9 +370,9 @@ linear.model.ints.2 <- lm(Y~Nitrates + Arsenic + Uranium+ earnings + pct.over.65
 
 # Residual
 data.resids <- data.frame(data.ggplot$Uranium, linear.model.ints.2$residuals)
-colnames(data.resids) <- c("Uranium", "Residuals")
+colnames(data.resids) <- c("Nitrates", "Residuals")
 
-residual.plot <- ggplot(data.resids, aes(x=Uranium, y=Residuals)) +
+residual.plot <- ggplot(data.resids, aes(x=Nitrates, y=Residuals)) +
 	geom_point()
 print(residual.plot)
 
