@@ -121,10 +121,14 @@ if(load.dat){
 	rurality <- read.csv(file="ruralurbancodes2013.csv", header=TRUE)
 
 	# agricultural use data
-	# rurality data
 	setwd(dir.main)
 	setwd("External Data/agricultural_use/")
 	agricultural <- read.csv(file="data_213608.csv", header=TRUE)
+
+	# earnings data
+	setwd(dir.main)
+	setwd("External Data/Earnings/")
+	earnings <- read.csv(file="earnings.csv", header=TRUE)
 
 	# # Propensity score matching data
 	# raw.covariate.dat <- read.csv(file=dat.prop, head=TRUE, sep=",")
@@ -219,6 +223,17 @@ for(j in 1:length(fips)){
 X.dat <- data.frame(X.dat, percent.agricultural.fips)
 colnames(X.dat)[ncol(X.dat)] <- "pct.agricultural"
 
+# Add earnings data to X
+earnings.fips <- integer(length(fips))
+for(j in 1:length(fips)){
+	# For each fips, take the average level of this chemical over all years
+	earnings.fips[j] <- earnings[earnings$fips==fips[j] & earnings$year==2016,
+		"total_med"]
+}
+
+X.dat <- data.frame(X.dat, earnings.fips)
+colnames(X.dat)[ncol(X.dat)] <- "earnings"
+
 # Response vector
 
 Y <- numeric(length(fips))
@@ -233,7 +248,7 @@ for(j in 1:length(fips)){
 
 
 # plot data
-data.ggplot <- data.frame(X.dat, Y)
+data.ggplot <- data.frame(X.dat[, -1], Y)
 
 # ggplot(data=data.ggplot, aes(x=Arsenic, y=Y)) + geom_point()
 # ggplot(data=data.ggplot, aes(x=DEHP, y=Y)) + geom_point()
@@ -243,17 +258,30 @@ data.ggplot <- data.frame(X.dat, Y)
 # # Fit lasso model
 # model <- cv.glmnet(x=as.matrix(X.dat[, 2:ncol(X.dat)]), y=Y)
 
-linear.model <- lm(Y~Arsenic+Nitrates+Uranium+rurality+pct.agricultural,
+linear.model <- lm(Y~Arsenic+Nitrates+Uranium+rurality+pct.agricultural+earnings,
 	data.ggplot)
 linear.model.ints <- lm(Y~Arsenic+Nitrates+Uranium +rurality + pct.agricultural
-	+ Arsenic:Nitrates + Arsenic:Uranium + Nitrates:Uranium + rurality:Arsenic
-	+ rurality:Nitrates + rurality:Uranium, data.ggplot)
+	+ earnings + Arsenic:Nitrates + Arsenic:Uranium + Nitrates:Uranium 
+	+ rurality:Arsenic + rurality:Nitrates + rurality:Uranium, data.ggplot)
 
-linear.model.ints.2 <- lm(Y~Uranium +rurality + Nitrates:Uranium, data.ggplot)
+linear.model.ints.2 <- lm(Y~Uranium +rurality + Nitrates:Uranium + earnings,
+	data.ggplot)
 
 linear.model.ints.3 <- lm(Y~Nitrates + pct.agricultural
-	+ pct.agricultural:Nitrates, data.ggplot)
+	+ pct.agricultural:Nitrates + earnings, data.ggplot)
 
+# X.pred <- model.matrix(X.dat[, -1])[, -1]
 
+# Lasso model
+formula <- as.formula(Y ~ .)
+# Second step: using model.matrix to take advantage of f
+X.pred <- model.matrix(formula, data.ggplot)[, -1]
+lasso.fit <- cv.glmnet(x=X.pred, y=Y)
+
+# Lasso model with interactions
+formula.int <- as.formula(Y ~ .*.)
+# Second step: using model.matrix to take advantage of f
+X.pred.int <- model.matrix(formula.int, data.ggplot)[, -1]
+lasso.fit.ints <- cv.glmnet(X.pred.int, Y)
 
 
