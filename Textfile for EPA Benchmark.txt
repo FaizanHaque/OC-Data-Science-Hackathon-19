@@ -1,0 +1,34 @@
+﻿population density of california counties
+
+population density increases by 1000, likelihood of contamination
+
+
+
+benchmark of chemical
+
+Nitrite
+Most people are not exposed to levels of nitrate and/or nitrite that would cause adverse health effects. Young infants (< 6 months of age) appeared to be particularly sensitive to the effects of nitrite on hemoglobin after consuming formula prepared with drinking water that contained nitrate at levels higher than recommended limits; some of these infants died. 
+EPA has set an enforceable regulation for nitrite, called a maximum contaminant level (MCL), at 1 mg/L or 1 ppm.
+
+https://safewater.zendesk.com/hc/en-us/articles/211401678-4-What-are-EPA-s-drinking-water-regulations-for-nitrite-
+
+https://www.epa.gov/sites/production/files/2014-05/documents/nitrates_nitrites_presentation.pdf
+
+
+Uranium
+https://www.atsdr.cdc.gov/csem/csem.asp?csem=16&po=8
+EPA has established a maximum contaminant level (MCL) for uranium of 30 micrograms per liter (µg/L) in drinking water. The MCL is the maximum permissible level of a contaminant in water that is delivered to any user of a public water system. EPA finalized this MCL for uranium of 30 µg/L in December 2000. Before this time, EPA did not have a limit specific to uranium in drinking water and instead regulated uranium content through gross alpha and gross beta limits. EPA's rule became effective in 2003. For more information on the EPA MCL, please visit either EPA's Radionuclides in Drinking WaterExternal Web Site Icon [EPA 2006a] or Radiation Protection-UraniumExternal Web Site Icon [EPA 2009b].
+
+
+DEHP
+https://www.epa.gov/sites/production/files/2016-09/documents/bis-2-ethylhexyl-phthalate.pdf
+No information is available on the chronic effects of DEHP in humans. (1)
+
+
+https://www.waterboards.ca.gov/drinking_water/certlic/drinkingwater/Arsenic.html
+California's revised arsenic MCL of 0.010 mg/L (equivalent to 10 micrograms per liter, μg/L) became effective on November 28, 2008. A 10-μg/L federal MCL for arsenic has been in effect since January 2006. Previous California and federal MCLs for arsenic were 50 μg/L.
+
+Drinking Water
+EPA has set 10 ppb as the allowable level for arsenic in drinking water (maximum contaminant level). (EPA 2006)
+
+The World Health Organization recommends a provisional drinking water guideline of 10 ppb.
