@@ -184,6 +184,17 @@ for(j in 1:length(fips)){
 	rurality.fips[j] <- rurality[rurality$FIPS==fips[j], "RUCC_2013"]
 }
 
+# Plot histogram of rurality levels
+df.rurality <- data.frame(rurality.fips)
+
+rurality.plot <- ggplot(df.rurality, aes(x=rurality.fips)) +
+	geom_histogram(binwidth=1)
+print(rurality.plot)
+
+# # Use coarser classification for rurality
+# rurality.fips[rurality.fips %in% c(3, 4, 5)] <- 3
+# rurality.fips[rurality.fips %in% c(6, 7, 8, 9)] <- 4
+
 rurality.fips <- factor(rurality.fips, ordered=TRUE)
 
 X.dat <- data.frame(X.dat, rurality.fips)
