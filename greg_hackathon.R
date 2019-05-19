@@ -52,6 +52,7 @@ library(gam)
 library(randomForest)
 library(Metrics)
 library(stargazer)
+library(boot)
 # library(googleway)
 # library(lsr)
 
@@ -187,6 +188,8 @@ for(i in 1:length(chemical_names)){
 		# For each fips, take the average level of this chemical over all years
 		averages[j] <- mean(raw.cal.chemicals.dat[raw.cal.chemicals.dat$chemical_species==chemical_names[i] &
 			raw.cal.chemicals.dat$fips==fips[j], "value"])
+		# averages[j] <- median(raw.cal.chemicals.dat[raw.cal.chemicals.dat$chemical_species==chemical_names[i] &
+		# 	raw.cal.chemicals.dat$fips==fips[j], "value"])
 	}
 
 	X.dat[, chemical_names[i]] <- averages
@@ -200,6 +203,18 @@ for(i in 1:nrow(X.dat)){
 		X.dat <- X.dat[-i, ]
 	}
 }
+
+# # Show example histogram
+# pollutants.over.time <- raw.cal.chemicals.dat[raw.cal.chemicals.dat$chemical_species=="Nitrates" &
+# 			raw.cal.chemicals.dat$fips==fips[4], "value"]
+
+# df.pollutants.over.time <- data.frame(pollutants.over.time)
+# colnames(df.pollutants.over.time) <- "Nitrates"
+
+# plot.pollutant.over.time <- ggplot(df.pollutants.over.time, aes(x=Nitrates)) +
+# 	geom_histogram()
+
+# print(plot.pollutant.over.time)
 
 # Re-name fips vector to only include remaining fips
 fips <- X.dat$FIPS
@@ -451,6 +466,16 @@ for(i in 1:ncol(X.corr)){
 
 df.dcor <- data.frame(colnames(X.corr), dcors)
 
+X.corr <- X.corr[, !(colnames(X.corr) == "rurality")]
+# Pearson correlations
+pcors <- numeric(ncol(X.corr))
+for(i in 1:ncol(X.corr)){
+	# pcors[i] <- corr(matrix(X.corr[, i], Y))
+	pcors[i] <- corr(cbind(X.corr[, i], Y))
+}
+
+df.pcor <- data.frame(colnames(X.corr), pcors)
+
 # Because of distance correaltions, it looks like ARsenic may have a nonlinear
 # relationship with response. Try GAM with Arsenic, Nitrates, pct.agricultural, earnings,
 # pct.over.65
@@ -472,7 +497,7 @@ data.gam <- data.frame(data.ggplot[c("Arsenic", "Nitrates", "pct.agricultural",
 
 gam.model.1 <- gam(Y ~., data=data.gam)
 
-data.gam.2 <- data.frame(data.ggplot[c("Arsenic", "Nitrates", "rurality",
+data.gam.2 <- data.frame(data.ggplot[c("Arsenic", "Nitrates", "Uranium",
 	"earnings", "pct.over.65")], Y)
 
 gam.model.2 <- gam(Y ~., data=data.gam.2)
