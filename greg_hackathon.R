@@ -320,6 +320,36 @@ for(j in 1:length(fips)){
 # plot data
 data.ggplot <- data.frame(X.dat[, -1], Y)
 
+# histograms of variables--reasonable distributions?
+arsenic.plot <- ggplot(data.ggplot, aes(x=Arsenic)) +geom_histogram()
+print(arsenic.plot)
+
+nitrates.plot <- ggplot(data.ggplot, aes(x=Nitrates)) +geom_histogram()
+print(nitrates.plot)
+
+uranium.plot <- ggplot(data.ggplot, aes(x=Uranium)) +geom_histogram()
+print(uranium.plot)
+
+# Try taking logarithms of pollutant levels
+data.ggplot$Arsenic <- log(data.ggplot$Arsenic)
+# colnames(data.ggplot)[colnames(data.ggplot)= "Arsenic"] <- "log(Arsenic)"
+data.ggplot$Nitrates <- log(data.ggplot$Nitrates)
+# colnames(data.ggplot)[colnames(data.ggplot)= "Nitrates"] <- "log(Nitrates)"
+data.ggplot$Uranium <- log(data.ggplot$Uranium)
+# colnames(data.ggplot)[colnames(data.ggplot)= "Uranium"] <- "log(Uranium)"
+
+arsenic.plot <- ggplot(data.ggplot, aes(x=Arsenic)) +geom_histogram() +
+	labs(x = "log(Arsenic)")
+print(arsenic.plot)
+
+nitrates.plot <- ggplot(data.ggplot, aes(x=Nitrates)) +geom_histogram() +
+	labs(x="log(Nitrates)")
+print(nitrates.plot)
+
+uranium.plot <- ggplot(data.ggplot, aes(x=Uranium)) +geom_histogram() + 
+	labs(x="log(Uranium)")
+print(uranium.plot)
+
 # ggplot(data=data.ggplot, aes(x=Arsenic, y=Y)) + geom_point()
 # ggplot(data=data.ggplot, aes(x=DEHP, y=Y)) + geom_point()
 # ggplot(data=data.ggplot, aes(x=Nitrates, y=Y)) + geom_point()
@@ -331,11 +361,20 @@ data.ggplot <- data.frame(X.dat[, -1], Y)
 # linear.model <- lm(Y~Arsenic+Nitrates+Uranium+pct.agricultural+
 # 	earnings+pct.over.65 + pct.white, data.ggplot)
 linear.model.ints <- lm(Y~Arsenic+Nitrates+Uranium  + pct.agricultural
-	+ earnings +pct.over.65 + rurality + Arsenic:Nitrates + Arsenic:Uranium 
+	+ earnings + pct.white +pct.over.65 + rurality + Arsenic:Nitrates + Arsenic:Uranium 
 	+ Nitrates:Uranium , data.ggplot)
 
 linear.model.ints.2 <- lm(Y~Nitrates + Arsenic + Uranium+ earnings + pct.over.65
 	+ Arsenic:Uranium + Nitrates:Uranium + Arsenic:Nitrates, data.ggplot)
+
+
+# Residual
+data.resids <- data.frame(data.ggplot$Uranium, linear.model.ints.2$residuals)
+colnames(data.resids) <- c("Uranium", "Residuals")
+
+residual.plot <- ggplot(data.resids, aes(x=Uranium, y=Residuals)) +
+	geom_point()
+print(residual.plot)
 
 # linear.model.ints.3 <- lm(Y~Nitrates + earnings + pct.over.65, data.ggplot)
 
@@ -370,8 +409,21 @@ formula.int <- as.formula(Y ~ .*.)
 X.pred.int <- model.matrix(formula.int, data.ggplot)[, -1]
 lasso.fit.ints <- cv.glmnet(X.pred.int, Y)
 
-mses <- c(mses, mse(Y, predict(lasso.fit, newx=X.pred)), mse(Y, predict(lasso.fit.ints, newx=X.pred.int)))
-mse.labels <- c(mse.labels, "lasso.fit", "lasso.fit.ints")
+
+# Lasso model only with interactions for chemicals
+formula.chem.int <- as.formula(Y ~. + Arsenic:Nitrates + Nitrates:Uranium
+	+ Arsenic:Uranium)
+# Second step: using model.matrix to take advantage of f
+X.pred.chem.int <- model.matrix(formula.chem.int, data.ggplot)[, -1]
+lasso.fit.chem.ints <- cv.glmnet(X.pred.chem.int, Y)
+
+mses <- c(mses, 
+	mse(Y, predict(lasso.fit, newx=X.pred)),
+	mse(Y, predict(lasso.fit.ints, newx=X.pred.int)),
+	mse(Y, predict(lasso.fit.chem.ints, newx=X.pred.chem.int))
+	)
+mse.labels <- c(mse.labels, "lasso.fit", "lasso.fit.ints",
+	"lasso.fit.chem.ints")
 
 # # Stability selection
 # stabs.selec <- stabsel(X.pred, Y, cutoff=0.55, q=5)
@@ -465,7 +517,4 @@ mse.labels <- c(mse.labels,
 
 # Compare MSE of OLS< lasso, gam, randomForest
 
-mse.df <- data.frame(mse.labels, mses)
-
-
-mses <- c()
+df.mse <- data.frame(mse.labels, mses)
