@@ -250,3 +250,10 @@ linear.model.ints <- lm(Y~Arsenic+Nitrates+Uranium +rurality + pct.agricultural
 	+ rurality:Nitrates + rurality:Uranium, data.ggplot)
 
 linear.model.ints.2 <- lm(Y~Uranium +rurality + Nitrates:Uranium, data.ggplot)
+
+linear.model.ints.3 <- lm(Y~Nitrates + pct.agricultural
+	+ pct.agricultural:Nitrates, data.ggplot)
+
+
+
+
