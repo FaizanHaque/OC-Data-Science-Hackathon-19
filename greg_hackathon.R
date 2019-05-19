@@ -179,8 +179,8 @@ for(j in 1:length(fips)){
 # write.csv(Y, file="Y.csv")
 
 
-# # plot data
-# data.ggplot <- data.frame(X.dat, Y)
+# plot data
+data.ggplot <- data.frame(X.dat, Y)
 
 # ggplot(data=data.ggplot, aes(x=Arsenic, y=Y)) + geom_point()
 # ggplot(data=data.ggplot, aes(x=DEHP, y=Y)) + geom_point()
@@ -189,3 +189,8 @@ for(j in 1:length(fips)){
 
 # Fit lasso model
 model <- cv.glmnet(x=as.matrix(X.dat[, 2:ncol(X.dat)]), y=Y)
+
+
+linear.model <- lm(Y~Arsenic+Nitrates+Uranium, data.ggplot)
+linear.model.ints <- lm(Y~Arsenic+Nitrates+Uranium + Arsenic:Nitrates +
+                          Arsenic:Uranium + Nitrates:Uranium, data.ggplot)
