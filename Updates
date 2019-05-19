@@ -1,0 +1,19 @@
+
+7:51
+
+>Faizan: collecting all external data set locations and uploading polygon data
+>Jav: working on the excel file
+> Shruhi: Looking at violation data set
+> Greg: model, adding new controls, median income in county
+current controls:
+- four pollutants
+- rurality
+- percentage of county used fr agriculture (rurality has to do with 
+Q: could you try plugging one of the two or both and see the impact
+models: lasso, ridge regression 
+  --- Least squarres: sum over all variables and minimize that
+  --- Lasso: add in a penalty for the coefficients
+  ---- Ridge regression
+  
+   
+> Sam: health factors and violation, farmland data with lon and lat of wells

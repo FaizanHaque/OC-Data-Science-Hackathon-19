@@ -1,0 +1,59 @@
+stateFIPS,State,countyFIPS,County,Year,Value,Land Type
+6,California,6001,Alameda,2011,0.0120,Cultivated Crops 
+6,California,6003,Alpine,2011,0.0000,Cultivated Crops 
+6,California,6005,Amador,2011,0.0080,Cultivated Crops 
+6,California,6007,Butte,2011,0.2310,Cultivated Crops 
+6,California,6009,Calaveras,2011,0.0010,Cultivated Crops 
+6,California,6011,Colusa,2011,0.4250,Cultivated Crops 
+6,California,6013,Contra Costa,2011,0.0710,Cultivated Crops 
+6,California,6015,Del Norte,2011,0.0030,Cultivated Crops 
+6,California,6017,El Dorado,2011,0.0000,Cultivated Crops 
+6,California,6019,Fresno,2011,0.3130,Cultivated Crops 
+6,California,6021,Glenn,2011,0.2760,Cultivated Crops 
+6,California,6023,Humboldt,2011,0.0010,Cultivated Crops 
+6,California,6025,Imperial,2011,0.0880,Cultivated Crops 
+6,California,6027,Inyo,2011,0.0020,Cultivated Crops 
+6,California,6029,Kern,2011,0.1750,Cultivated Crops 
+6,California,6031,Kings,2011,0.6180,Cultivated Crops 
+6,California,6033,Lake,2011,0.0140,Cultivated Crops 
+6,California,6035,Lassen,2011,0.0150,Cultivated Crops 
+6,California,6037,Los Angeles,2011,0.0090,Cultivated Crops 
+6,California,6039,Madera,2011,0.2200,Cultivated Crops 
+6,California,6041,Marin,2011,0.0060,Cultivated Crops 
+6,California,6043,Mariposa,2011,0.0000,Cultivated Crops 
+6,California,6045,Mendocino,2011,0.0080,Cultivated Crops 
+6,California,6047,Merced,2011,0.3550,Cultivated Crops 
+6,California,6049,Modoc,2011,0.0280,Cultivated Crops 
+6,California,6051,Mono,2011,0.0020,Cultivated Crops 
+6,California,6053,Monterey,2011,0.0990,Cultivated Crops 
+6,California,6055,Napa,2011,0.0750,Cultivated Crops 
+6,California,6057,Nevada,2011,0.0000,Cultivated Crops 
+6,California,6059,Orange,2011,0.0050,Cultivated Crops 
+6,California,6061,Placer,2011,0.0370,Cultivated Crops 
+6,California,6063,Plumas,2011,0.0010,Cultivated Crops 
+6,California,6065,Riverside,2011,0.0270,Cultivated Crops 
+6,California,6067,Sacramento,2011,0.2430,Cultivated Crops 
+6,California,6069,San Benito,2011,0.0410,Cultivated Crops 
+6,California,6071,San Bernardino,2011,0.0020,Cultivated Crops 
+6,California,6073,San Diego,2011,0.0170,Cultivated Crops 
+6,California,6075,San Francisco,2011,0.0000,Cultivated Crops 
+6,California,6077,San Joaquin,2011,0.5520,Cultivated Crops 
+6,California,6079,San Luis Obispo,2011,0.0390,Cultivated Crops 
+6,California,6081,San Mateo,2011,0.0160,Cultivated Crops 
+6,California,6083,Santa Barbara,2011,0.0520,Cultivated Crops 
+6,California,6085,Santa Clara,2011,0.0240,Cultivated Crops 
+6,California,6087,Santa Cruz,2011,0.0420,Cultivated Crops 
+6,California,6089,Shasta,2011,0.0150,Cultivated Crops 
+6,California,6091,Sierra,2011,0.0010,Cultivated Crops 
+6,California,6093,Siskiyou,2011,0.0310,Cultivated Crops 
+6,California,6095,Solano,2011,0.2630,Cultivated Crops 
+6,California,6097,Sonoma,2011,0.0650,Cultivated Crops 
+6,California,6099,Stanislaus,2011,0.3010,Cultivated Crops 
+6,California,6101,Sutter,2011,0.7260,Cultivated Crops 
+6,California,6103,Tehama,2011,0.0370,Cultivated Crops 
+6,California,6105,Trinity,2011,0.0000,Cultivated Crops 
+6,California,6107,Tulare,2011,0.2080,Cultivated Crops 
+6,California,6109,Tuolumne,2011,0.0000,Cultivated Crops 
+6,California,6111,Ventura,2011,0.0650,Cultivated Crops 
+6,California,6113,Yolo,2011,0.4860,Cultivated Crops 
+6,California,6115,Yuba,2011,0.2040,Cultivated Crops 
