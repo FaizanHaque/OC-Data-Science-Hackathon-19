@@ -120,6 +120,12 @@ if(load.dat){
 	setwd("External Data/Rurality/")
 	rurality <- read.csv(file="ruralurbancodes2013.csv", header=TRUE)
 
+	# agricultural use data
+	# rurality data
+	setwd(dir.main)
+	setwd("External Data/agricultural_use/")
+	agricultural <- read.csv(file="data_213608.csv", header=TRUE)
+
 	# # Propensity score matching data
 	# raw.covariate.dat <- read.csv(file=dat.prop, head=TRUE, sep=",")
 	# # Water usage (desired response)
@@ -201,6 +207,18 @@ X.dat <- data.frame(X.dat, rurality.fips)
 colnames(X.dat)[ncol(X.dat)] <- "rurality"
 
 # X.dat$rurality <- as.factor(X.dat$rurality)
+
+# Add percentage of land use for agriculture to X
+percent.agricultural.fips <- integer(length(fips))
+for(j in 1:length(fips)){
+	# For each fips, take the average level of this chemical over all years
+	percent.agricultural.fips[j] <- agricultural[agricultural$countyFIPS==fips[j],
+	"Value"]
+}
+
+X.dat <- data.frame(X.dat, percent.agricultural.fips)
+colnames(X.dat)[ncol(X.dat)] <- "pct.agricultural"
+
 # Response vector
 
 Y <- numeric(length(fips))
@@ -225,9 +243,10 @@ data.ggplot <- data.frame(X.dat, Y)
 # # Fit lasso model
 # model <- cv.glmnet(x=as.matrix(X.dat[, 2:ncol(X.dat)]), y=Y)
 
-linear.model <- lm(Y~Arsenic+Nitrates+Uranium+rurality, data.ggplot)
-linear.model.ints <- lm(Y~Arsenic+Nitrates+Uranium +rurality + Arsenic:Nitrates +
-	Arsenic:Uranium + Nitrates:Uranium + rurality:Arsenic + rurality:Nitrates +
-	rurality:Uranium, data.ggplot)
+linear.model <- lm(Y~Arsenic+Nitrates+Uranium+rurality+pct.agricultural,
+	data.ggplot)
+linear.model.ints <- lm(Y~Arsenic+Nitrates+Uranium +rurality + pct.agricultural
+	+ Arsenic:Nitrates + Arsenic:Uranium + Nitrates:Uranium + rurality:Arsenic
+	+ rurality:Nitrates + rurality:Uranium, data.ggplot)
 
 linear.model.ints <- lm(Y~Uranium +rurality + Nitrates:Uranium, data.ggplot)
