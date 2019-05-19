@@ -8,11 +8,11 @@
 
 
 
-# rm(list=ls())   
+rm(list=ls())   
 
 
-rm(list=ls()[!ls() %in% c("raw.covariate.dat", "raw.usage.dat", "citycounty",
-	"n.covariate", "n.usage", "region")])
+# rm(list=ls()[!ls() %in% c("raw.covariate.dat", "raw.usage.dat", "citycounty",
+	# "n.covariate", "n.usage", "region")])
 # rm(list=ls()[!ls() %in% c("raw.dat", "data", "ruralurban",
 	# "citycounty", "employer.names", "fortune500", desc.files)])
 
@@ -47,8 +47,18 @@ library(ggplot2)
 library(glmnet)
 library(gglasso)
 library(stabs)
+library(energy)
+library(gam)
+library(randomForest)
+library(Metrics)
+library(stargazer)
 # library(googleway)
 # library(lsr)
+
+
+###### Set seed for reproducibility ######
+
+set.seed(20197)
 
 ################ Parameters ################
 
@@ -318,18 +328,33 @@ data.ggplot <- data.frame(X.dat[, -1], Y)
 # # Fit lasso model
 # model <- cv.glmnet(x=as.matrix(X.dat[, 2:ncol(X.dat)]), y=Y)
 
-linear.model <- lm(Y~Arsenic+Nitrates+Uranium+rurality+pct.agricultural+
-	earnings+pct.over.65 + pct.white, data.ggplot)
-linear.model.ints <- lm(Y~Arsenic+Nitrates+Uranium +rurality + pct.agricultural
-	+ earnings +pct.over.65 + Arsenic:Nitrates + Arsenic:Uranium 
-	+ Nitrates:Uranium + rurality:Arsenic + rurality:Nitrates 
-	+ rurality:Uranium, data.ggplot)
+# linear.model <- lm(Y~Arsenic+Nitrates+Uranium+pct.agricultural+
+# 	earnings+pct.over.65 + pct.white, data.ggplot)
+linear.model.ints <- lm(Y~Arsenic+Nitrates+Uranium  + pct.agricultural
+	+ earnings +pct.over.65 + rurality + Arsenic:Nitrates + Arsenic:Uranium 
+	+ Nitrates:Uranium , data.ggplot)
 
-linear.model.ints.2 <- lm(Y~Nitrates +rurality + earnings + pct.over.65
-	+ Uranium + Arsenic:Uranium + Nitrates:Uranium + Arsenic:rurality
-	+ Uranium:rurality, data.ggplot)
+linear.model.ints.2 <- lm(Y~Nitrates + Arsenic + Uranium+ earnings + pct.over.65
+	+ Arsenic:Uranium + Nitrates:Uranium + Arsenic:Nitrates, data.ggplot)
 
-linear.model.ints.3 <- lm(Y~Nitrates + earnings + pct.over.65, data.ggplot)
+# linear.model.ints.3 <- lm(Y~Nitrates + earnings + pct.over.65, data.ggplot)
+
+# Linear model MSEs
+
+mses <-c(
+	# mse(Y, predict(linear.model)),
+	mse(Y, predict(linear.model.ints)), 
+	mse(Y, predict(linear.model.ints.2))
+	# mse(Y, predict(linear.model.ints.3))
+	)
+mse.labels <- c(
+	# "linear.model", 
+	"linear.model.ints",
+	"linear.model.ints.2"
+	# "linear.model.ints.3"
+	)
+
+
 
 # X.pred <- model.matrix(X.dat[, -1])[, -1]
 
@@ -345,6 +370,9 @@ formula.int <- as.formula(Y ~ .*.)
 X.pred.int <- model.matrix(formula.int, data.ggplot)[, -1]
 lasso.fit.ints <- cv.glmnet(X.pred.int, Y)
 
+mses <- c(mses, mse(Y, predict(lasso.fit, newx=X.pred)), mse(Y, predict(lasso.fit.ints, newx=X.pred.int)))
+mse.labels <- c(mse.labels, "lasso.fit", "lasso.fit.ints")
+
 # # Stability selection
 # stabs.selec <- stabsel(X.pred, Y, cutoff=0.55, q=5)
 
@@ -358,3 +386,86 @@ groups.ints <- c(1, 2, 3, 4, 5, 5, 5, 6, 7, 8, 9, 10, 11, 12, 13, 13, 13, 14,
 	30, 31, 31, 31, 32, 33, 34, 35, 36, 36, 36, 37, 37, 37, 38, 38, 38, 39, 39,
 	39, 40, 41, 42, 43, 44, 45)
 g.lasso.fit.int <- cv.gglasso(x=X.pred.int, y=Y, group=groups.ints, nfolds=10)
+
+# Screening via distance correlation
+
+X.corr <- X.dat[, -1]
+
+# distance correlations
+dcors <- numeric(ncol(X.corr))
+for(i in 1:ncol(X.corr)){
+	dcors[i] <- dcor(x=X.corr[, i], y=Y)
+}
+
+df.dcor <- data.frame(colnames(X.corr), dcors)
+
+# Because of distance correaltions, it looks like ARsenic may have a nonlinear
+# relationship with response. Try GAM with Arsenic, Nitrates, pct.agricultural, earnings,
+# pct.over.65
+
+# First scale data
+
+for(i in 1:ncol(data.ggplot)){
+	if(is.numeric(data.ggplot[, i])){
+		data.ggplot[, i] <- scale(data.ggplot[, i])
+	}
+}
+
+# data.ggplot <- scale(data.ggplot)
+
+# gam.full <- gam(Y ~., data=data.ggplot)
+
+data.gam <- data.frame(data.ggplot[c("Arsenic", "Nitrates", "pct.agricultural",
+	"earnings", "pct.over.65", "rurality")], Y)
+
+gam.model.1 <- gam(Y ~., data=data.gam)
+
+data.gam.2 <- data.frame(data.ggplot[c("Arsenic", "Nitrates", "rurality",
+	"earnings", "pct.over.65")], Y)
+
+gam.model.2 <- gam(Y ~., data=data.gam.2)
+
+gam.model.ints <- gam(Y ~ Arsenic + Nitrates + Uranium + earnings + pct.over.65
+	+ Arsenic:Uranium + Nitrates:Uranium + Nitrates:Arsenic, data=data.ggplot)
+
+mses <- c(mses, 
+	# mse(Y, predict(gam.full)), 
+	mse(Y, predict(gam.model.1)), 
+	mse(Y, predict(gam.model.2)),
+	mse(Y, predict(gam.model.ints))
+	)
+mse.labels <- c(mse.labels, 
+	# "gam.full", 
+	"gam.model.1", 
+	"gam.model.2",
+	"gam.model.ints"
+	)
+
+# Also try random forest
+
+# rf.full <- randomForest(Y ~., data=data.ggplot)
+
+
+rf.model.1 <- randomForest(Y ~., data=data.gam)
+
+
+rf.model.2 <- randomForest(Y ~., data=data.gam.2)
+
+mses <- c(mses,
+	# mse(Y, rf.full$predicted),
+	mse(Y, rf.model.1$predicted), 
+	mse(Y, rf.model.2$predicted)
+	)
+
+mse.labels <- c(mse.labels, 
+	# "rf.full", 
+	"rf.model.1", 
+	"rf.model.2"
+	)
+
+# Compare MSE of OLS< lasso, gam, randomForest
+
+mse.df <- data.frame(mse.labels, mses)
+
+
+mses <- c()
