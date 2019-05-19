@@ -50,6 +50,7 @@ library(stabs)
 library(energy)
 library(gam)
 library(randomForest)
+library(Metrics)
 # library(googleway)
 # library(lsr)
 
@@ -334,6 +335,14 @@ linear.model.ints.2 <- lm(Y~Nitrates +rurality + earnings + pct.over.65
 
 linear.model.ints.3 <- lm(Y~Nitrates + earnings + pct.over.65, data.ggplot)
 
+# Linear model MSEs
+
+mses <-c(mse(Y, predict(linear.model)),
+	mse(Y, predict(linear.model.ints.2)), mse(Y, predict(linear.model.ints.3)))
+mse.labels <- c("linear.model", "linear.model.ints.2", "linear.model.ints.3")
+
+
+
 # X.pred <- model.matrix(X.dat[, -1])[, -1]
 
 # Lasso model
@@ -347,6 +356,9 @@ formula.int <- as.formula(Y ~ .*.)
 # Second step: using model.matrix to take advantage of f
 X.pred.int <- model.matrix(formula.int, data.ggplot)[, -1]
 lasso.fit.ints <- cv.glmnet(X.pred.int, Y)
+
+mses <- c(mses, mse(Y, predict(lasso.fit, newx=X.pred)), mse(Y, predict(lasso.fit.ints, newx=X.pred.int)))
+mse.labels <- c(mse.labels, "lasso.fit", "lasso.fit.ints")
 
 # # Stability selection
 # stabs.selec <- stabsel(X.pred, Y, cutoff=0.55, q=5)
@@ -383,12 +395,16 @@ gam.full <- gam(Y ~., data=data.ggplot)
 data.gam <- data.frame(X.dat[c("Arsenic", "Nitrates", "pct.agricultural",
 	"earnings", "pct.over.65", "rurality")], Y)
 
-gam.model <- gam(Y ~., data=data.gam)
+gam.model.1 <- gam(Y ~., data=data.gam)
 
 data.gam.2 <- data.frame(X.dat[c("Arsenic", "Nitrates", "rurality",
 	"earnings", "pct.over.65")], Y)
 
 gam.model.2 <- gam(Y ~., data=data.gam)
+
+mses <- c(mses, mse(Y, predict(gam.full)), mse(Y, predict(gam.model.1)), 
+	mse(Y, predict(gam.model.2)))
+mse.labels <- c(mse.labels, "gam.full", "gam.model.1", "gam.model.2")
 
 # Also try random forest
 
@@ -400,3 +416,14 @@ rf.model.1 <- randomForest(Y ~., data=data.gam)
 
 rf.model.2 <- randomForest(Y ~., data=data.gam)
 
+mses <- c(mses, mse(Y, rf.full$predicted), mse(Y, rf.model.1$predicted), 
+	mse(Y, rf.model.2$predicted))
+
+mse.labels <- c(mse.labels, "rf.full", "rf.model.1", "rf.model.2")
+
+# Compare MSE of OLS< lasso, gam, randomForest
+
+mse.df <- data.frame(mses, mse.labels)
+
+
+mses <- c()
