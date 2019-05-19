@@ -425,15 +425,20 @@ data.gam.2 <- data.frame(data.ggplot[c("Arsenic", "Nitrates", "rurality",
 
 gam.model.2 <- gam(Y ~., data=data.gam.2)
 
+gam.model.ints <- gam(Y ~ Arsenic + Nitrates + Uranium + earnings + pct.over.65
+	+ Arsenic:Uranium + Nitrates:Uranium + Nitrates:Arsenic, data=data.ggplot)
+
 mses <- c(mses, 
 	# mse(Y, predict(gam.full)), 
 	mse(Y, predict(gam.model.1)), 
-	mse(Y, predict(gam.model.2))
+	mse(Y, predict(gam.model.2)),
+	mse(Y, predict(gam.model.ints))
 	)
 mse.labels <- c(mse.labels, 
 	# "gam.full", 
 	"gam.model.1", 
-	"gam.model.2"
+	"gam.model.2",
+	"gam.model.ints"
 	)
 
 # Also try random forest
