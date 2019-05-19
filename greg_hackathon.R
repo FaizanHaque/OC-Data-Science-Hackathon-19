@@ -328,6 +328,13 @@ for(j in 1:length(fips)){
 	Y[j] <- health.2018[health.2018$FIPS==fips[j], "X..Fair.Poor"]
 }
 
+# Histogram of outcomes
+
+dat.health <- data.frame(Y)
+
+health.plot <- ggplot(dat.health, aes(x=Y)) + geom_histogram()
+print(health.plot)
+
 # # Save data
 # write.csv(X.dat, file="X.csv")
 # write.csv(Y, file="Y.csv")
