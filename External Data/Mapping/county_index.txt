@@ -1,0 +1,47 @@
+ala	Alameda
+ama	Amador
+but	Butte
+col	Colusa
+con	Contra Costa
+eld	El Dorado
+fre	Fresno
+gle	Glenn
+imp	Imperial
+ker	Kern
+kin	Kings
+lak	Lake
+los	Los Angeles
+mad	Madera
+mar	Marin
+mpa	Mariposa
+men	Mendocino
+mer	Merced
+mod	Modoc
+mnt	Monterey
+nap	Napa
+nev	Nevada
+ora	Orange
+pla	Placer
+riv	Riverside
+sac	Sacramento
+sbt	San Benito
+sbd	San Bernardino
+sdg	San Diego
+sjq	San Joaquin
+slo	San Luis Obispo
+smt	San Mateo
+sba	Santa Barbara
+scl	Santa Clara
+scr	Santa Cruz
+sha	Shasta
+srv	Sierra Valley
+sis	Siskiyou
+sol	Solano
+son	Sonoma
+sta	Stanislaus
+sut	Sutter
+teh	Tehema
+tul	Tulare
+ven	Ventura
+yol	Yolo
+yub	Yuba
