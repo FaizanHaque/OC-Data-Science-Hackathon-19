@@ -1,8 +1,10 @@
 # Data competition
 
+# setwd("/Users/gregfaletto/Google Drive/Data Science/R/OCRUG Hackathon/Data")
+
 # setwd("/Users/gregfaletto/Google Drive/Data Science/R/OCRUG Hackathon")
 
-# setwd("/Users/gregfaletto/Google Drive/Data Science/R/OCRUG Hackathon/Data")
+# setwd("/Users/gregfaletto/Documents/GitHub/OC-Data-Science-Hackathon-19")
 
 
 
@@ -34,7 +36,7 @@ library(grid)
 # library(caret)
 # library(pls)
 library(plyr)
-library(forecast)
+# library(forecast)
 # library(DMwR)
 # library(penalized)
 # library(elasticnet)
@@ -53,11 +55,11 @@ print("Storing parameters...")
 # # directory where output should be stored
 # dir.out <- "/Users/gregoryfaletto/Documents/R/Citadel/Models"
 
-# directory where this R file lives
-dir.main <- "/Users/gregfaletto/Google Drive/Data Science/R/OCRUG Hackathon"
+# # directory where this R file lives
+# dir.main <- "/Users/gregfaletto/Google Drive/Data Science/R/OCRUG Hackathon"
 
-# directory where R raw, processed data files live
-dir.dat <- "/Users/gregfaletto/Google Drive/Data Science/R/OCRUG Hackathon/Data"
+# # directory where R raw, processed data files live
+# dir.dat <- "/Users/gregfaletto/Google Drive/Data Science/R/OCRUG Hackathon/Data"
 
 # # directory where geographic data files live
 # dir.geo <- "/Users/gregfaletto/Documents/R/ZipRecruiter/Geographic data"
@@ -86,11 +88,15 @@ if(load.dat){
 	t0 <- Sys.time()
 
 	## Read in training and data data, the latter may take a few minutes to run
-	setwd(dir.dat)
+	# setwd(dir.dat)
+	dir.main <- getwd()
 
 	# Chemicals data
+	setwd("External Data/Chemicals/")
 	raw.cal.chemicals.dat <- read.csv(file=dat.chems)
 	# 2010 health outcomes
+	setwd(dir.main)
+	setwd("External Data/Health Outcomes/")
 	health.2010 <- read.csv(file="2016_health_outcomes_clean.csv", header=TRUE)
 	# 2011 health outcomes
 	health.2011 <- read.csv(file="2016_health_outcomes_clean.csv", header=TRUE)
@@ -108,6 +114,11 @@ if(load.dat){
 	health.2017 <- read.csv(file="2017_health_outcomes_clean.csv", header=TRUE)
 	# 2018 health outcomes
 	health.2018 <- read.csv(file="2018_health_outcomes_clean.csv", header=TRUE)
+
+	# rurality data
+	setwd(dir.main)
+	setwd("External Data/Rurality/")
+	rurality <- read.csv(file="ruralurbancodes2013.csv", header=TRUE)
 
 	# # Propensity score matching data
 	# raw.covariate.dat <- read.csv(file=dat.prop, head=TRUE, sep=",")
@@ -166,6 +177,19 @@ for(i in 1:nrow(X.dat)){
 # Re-name fips vector to only include remaining fips
 fips <- X.dat$FIPS
 
+# Add rurality levels to X
+rurality.fips <- integer(length(fips))
+for(j in 1:length(fips)){
+	# For each fips, take the average level of this chemical over all years
+	rurality.fips[j] <- rurality[rurality$FIPS==fips[j], "RUCC_2013"]
+}
+
+rurality.fips <- factor(rurality.fips, ordered=TRUE)
+
+X.dat <- data.frame(X.dat, rurality.fips)
+colnames(X.dat)[ncol(X.dat)] <- "rurality"
+
+# X.dat$rurality <- as.factor(X.dat$rurality)
 # Response vector
 
 Y <- numeric(length(fips))
@@ -187,10 +211,12 @@ data.ggplot <- data.frame(X.dat, Y)
 # ggplot(data=data.ggplot, aes(x=Nitrates, y=Y)) + geom_point()
 # ggplot(data=data.ggplot, aes(x=Uranium, y=Y)) + geom_point()
 
-# Fit lasso model
-model <- cv.glmnet(x=as.matrix(X.dat[, 2:ncol(X.dat)]), y=Y)
+# # Fit lasso model
+# model <- cv.glmnet(x=as.matrix(X.dat[, 2:ncol(X.dat)]), y=Y)
 
+linear.model <- lm(Y~Arsenic+Nitrates+Uranium+rurality, data.ggplot)
+linear.model.ints <- lm(Y~Arsenic+Nitrates+Uranium +rurality + Arsenic:Nitrates +
+	Arsenic:Uranium + Nitrates:Uranium + rurality:Arsenic + rurality:Nitrates +
+	rurality:Uranium, data.ggplot)
 
-linear.model <- lm(Y~Arsenic+Nitrates+Uranium, data.ggplot)
-linear.model.ints <- lm(Y~Arsenic+Nitrates+Uranium + Arsenic:Nitrates +
-                          Arsenic:Uranium + Nitrates:Uranium, data.ggplot)
+linear.model.ints <- lm(Y~Uranium +rurality + Nitrates:Uranium, data.ggplot)
