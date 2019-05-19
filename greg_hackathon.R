@@ -47,6 +47,9 @@ library(ggplot2)
 library(glmnet)
 library(gglasso)
 library(stabs)
+library(energy)
+library(gam)
+library(randomForest)
 # library(googleway)
 # library(lsr)
 
@@ -358,3 +361,42 @@ groups.ints <- c(1, 2, 3, 4, 5, 5, 5, 6, 7, 8, 9, 10, 11, 12, 13, 13, 13, 14,
 	30, 31, 31, 31, 32, 33, 34, 35, 36, 36, 36, 37, 37, 37, 38, 38, 38, 39, 39,
 	39, 40, 41, 42, 43, 44, 45)
 g.lasso.fit.int <- cv.gglasso(x=X.pred.int, y=Y, group=groups.ints, nfolds=10)
+
+# Screening via distance correlation
+
+X.corr <- X.dat[, -1]
+
+# distance correlations
+dcors <- numeric(ncol(X.corr))
+for(i in 1:ncol(X.corr)){
+	dcors[i] <- dcor(x=X.corr[, i], y=Y)
+}
+
+df.dcor <- data.frame(colnames(X.corr), dcors)
+
+# Because of distance correaltions, it looks like ARsenic may have a nonlinear
+# relationship with response. Try GAM with Arsenic, Nitrates, pct.agricultural, earnings,
+# pct.over.65
+
+gam.full <- gam(Y ~., data=data.ggplot)
+
+data.gam <- data.frame(X.dat[c("Arsenic", "Nitrates", "pct.agricultural",
+	"earnings", "pct.over.65", "rurality")], Y)
+
+gam.model <- gam(Y ~., data=data.gam)
+
+data.gam.2 <- data.frame(X.dat[c("Arsenic", "Nitrates", "rurality",
+	"earnings", "pct.over.65")], Y)
+
+gam.model.2 <- gam(Y ~., data=data.gam)
+
+# Also try random forest
+
+rf.full <- randomForest(Y ~., data=data.ggplot)
+
+
+rf.model.1 <- randomForest(Y ~., data=data.gam)
+
+
+rf.model.2 <- randomForest(Y ~., data=data.gam)
+
