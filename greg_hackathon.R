@@ -512,6 +512,24 @@ gam.model.2 <- gam(Y ~., data=data.gam.2)
 gam.model.ints <- gam(Y ~ Arsenic + Nitrates + Uranium + earnings + pct.over.65
 	+ Arsenic:Uranium + Nitrates:Uranium + Nitrates:Arsenic, data=data.ggplot)
 
+# It turns out that the above model doesn't include nonlinear terms in the
+# variables, because I didn't use the s() function to get smooth nonlinear
+# functions of each variable. Try that:
+
+gam.model.ints.spline <- gam(Y ~ s(Arsenic, df=4) + s(Nitrates, df=4) + 
+	s(Uranium, df=4) + earnings + pct.over.65
+	+ Arsenic:Uranium + Nitrates:Uranium + Nitrates:Arsenic, data=data.ggplot)
+
+# ... but when you do that and try summary(gam.model.ints.spline), you'll see
+# that none of the non-linearities are statistically signficiant. So why
+# is it that some of the variables were significant in gam.model.ints
+# when they weren't in linear.model.ints.2? The answer is simply that a 
+# different significance test was used--ANOVA for the GAM model, a t-test
+# for the linear model. If you do anova(linear.model.ints.2),
+# you will do the same significance test on linear.model.ints.2, and the result
+# will look exactly the same as it did in our GAM model. So the
+# GAM model wasn't actually doing anything different. Whoops. =(
+
 mses <- c(mses, 
 	# mse(Y, predict(gam.full)), 
 	mse(Y, predict(gam.model.1)), 
